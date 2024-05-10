@@ -1,0 +1,10 @@
+[
+  {
+    "Id": "734a5301-e118-4258-ba95-76b10238768c",
+    "Name": "IsBasketEnabled",
+    "Type": "bool",
+    "Value": {
+      "ValueKind": 3
+    }
+  }
+]

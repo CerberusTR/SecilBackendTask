@@ -23,10 +23,10 @@ namespace Service_A.Controllers
             return Ok(configurations);
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetById(Guid id)
+        [HttpGet("{name}")]
+        public IActionResult GetByName(string name)
         {
-            var configuration = _repository.GetById(id);
+            var configuration = _repository.GetByName(name);
             if (configuration == null)
             {
                 return NotFound();
@@ -39,9 +39,8 @@ namespace Service_A.Controllers
         {
             try
             {
-                configuration.Id = Guid.NewGuid();
                 _repository.Add(configuration);
-                return CreatedAtAction(nameof(GetById), new { id = configuration.Id }, configuration);
+                return CreatedAtAction(nameof(GetByName), new { name = configuration.Name }, configuration);
             }
             catch (ArgumentException ex)
             {
@@ -49,30 +48,30 @@ namespace Service_A.Controllers
             }
         }
 
-        [HttpPut("{id}")]
-        public IActionResult Update(Guid id, Configuration configuration)
+        [HttpPut("{name}")]
+        public IActionResult Update(string name, Configuration configuration)
         {
-            var existingConfiguration = _repository.GetById(id);
+            var existingConfiguration = _repository.GetByName(name);
             if (existingConfiguration == null)
             {
                 return NotFound();
             }
 
-            configuration.Id = id;
+            configuration.Name = name;
             _repository.Update(configuration);
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult Delete(Guid id)
+        [HttpDelete("{name}")]
+        public IActionResult Delete(string name)
         {
-            var configuration = _repository.GetById(id);
+            var configuration = _repository.GetByName(name);
             if (configuration == null)
             {
                 return NotFound();
             }
 
-            _repository.Delete(id);
+            _repository.Delete(name);
             return NoContent();
         }
     }

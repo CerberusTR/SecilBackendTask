@@ -23,11 +23,6 @@ namespace Service_B.Repositories
             return JsonConvert.DeserializeObject<List<Configuration>>(data);
         }
 
-        public Configuration GetById(Guid id)
-        {
-            return GetAll().FirstOrDefault(c => c.Id == id);
-        }
-
         public Configuration GetByName(string name)
         {
             return GetAll().FirstOrDefault(c => c.Name == name);
@@ -37,9 +32,10 @@ namespace Service_B.Repositories
         {
             if (GetByName(configuration.Name) != null)
             {
-                throw new ArgumentException("A configuration with the same name already exists.");
+                throw new ArgumentException("B configuration with the same name already exists.");
             }
 
+            configuration.Id = Guid.NewGuid();
             var configurations = GetAll().ToList();
             configurations.Add(configuration);
             SaveAll(configurations);
@@ -48,7 +44,7 @@ namespace Service_B.Repositories
         public void Update(Configuration configuration)
         {
             var configurations = GetAll().ToList();
-            var index = configurations.FindIndex(c => c.Id == configuration.Id);
+            var index = configurations.FindIndex(c => c.Name == configuration.Name);
             if (index != -1)
             {
                 configurations[index] = configuration;
@@ -56,10 +52,10 @@ namespace Service_B.Repositories
             }
         }
 
-        public void Delete(Guid id)
+        public void Delete(string name)
         {
             var configurations = GetAll().ToList();
-            var configuration = configurations.FirstOrDefault(c => c.Id == id);
+            var configuration = configurations.FirstOrDefault(c => c.Name == name);
             if (configuration != null)
             {
                 configurations.Remove(configuration);
