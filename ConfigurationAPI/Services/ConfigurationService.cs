@@ -1,47 +1,51 @@
-﻿using ConfigurationLibrary;
+﻿using ConfigurationAPI.Repositories;
+using ConfigurationLibrary;
 using Newtonsoft.Json;
 
 namespace ConfigurationAPI.Services
 {
     public class ConfigurationService
     {
-        private readonly ConfigurationContext _context;
+        private readonly IConfigurationRepository _configurationRepository;
 
-        public ConfigurationService(ConfigurationContext context)
+        public ConfigurationService(IConfigurationRepository configurationRepository)
         {
-            _context = context;
+            _configurationRepository = configurationRepository;
         }
 
-        public Configuration GetConfigurationByName(string name)
+        public async Task<Configuration> GetConfigurationByNameAsync(string name)
         {
-            return _context.Configurations.FirstOrDefault(config => config.Name == name);
+            return await _configurationRepository.GetConfigurationByNameAsync(name);
         }
 
-        public IEnumerable<Configuration> GetAllConfigurations()
+        public async Task<IEnumerable<Configuration>> GetAllConfigurationsAsync()
         {
-            return _context.Configurations.ToList();
+            return await _configurationRepository.GetAllConfigurationsAsync();
         }
 
-        public void AddConfiguration(string name, string type, string value, string applicationName)
+        public async Task AddConfigurationAsync(string name, string type, string value, string applicationName)
         {
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(type) || value == null || string.IsNullOrEmpty(applicationName))
             {
                 throw new ArgumentException("All fields are required.");
             }
 
-            if (_context.Configurations.Any(c => c.Name == name))
+            var config = new Configuration
             {
-                throw new InvalidOperationException("A configuration with the same name already exists.");
-            }
+                Name = name,
+                Type = type,
+                Value = value,
+                ApplicationName = applicationName,
+                IsActive = false,
+                UpdatedDate = DateTime.UtcNow
+            };
 
-            var config = ConfigurationFactory.CreateConfiguration(name, type, value, applicationName);
-            _context.Configurations.Add(config);
-            _context.SaveChanges();
+            await _configurationRepository.AddConfigurationAsync(config);
         }
 
-        public void UpdateConfiguration(string name, string type, string value, bool isActive, string applicationName)
+        public async Task UpdateConfigurationAsync(string name, string type, string value, bool isActive, string applicationName)
         {
-            var config = _context.Configurations.FirstOrDefault(c => c.Name == name);
+            var config = await _configurationRepository.GetConfigurationByNameAsync(name);
             if (config != null)
             {
                 config.Type = type;
@@ -50,18 +54,13 @@ namespace ConfigurationAPI.Services
                 config.ApplicationName = applicationName;
                 config.UpdatedDate = DateTime.UtcNow;
 
-                _context.SaveChanges();
+                await _configurationRepository.UpdateConfigurationAsync(config);
             }
         }
 
-        public void DeleteConfiguration(string name)
+        public async Task DeleteConfigurationAsync(string name)
         {
-            var config = _context.Configurations.FirstOrDefault(c => c.Name == name);
-            if (config != null)
-            {
-                _context.Configurations.Remove(config);
-                _context.SaveChanges();
-            }
+            await _configurationRepository.DeleteConfigurationAsync(name);
         }
     }
 }

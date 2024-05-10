@@ -1,3 +1,4 @@
+using ConfigurationAPI.Repositories;
 using ConfigurationAPI.Services;
 using ConfigurationLibrary;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ConfigurationContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<ConfigurationService>();
+builder.Services.AddScoped<IConfigurationRepository, ConfigurationRepository>();
 builder.Services.AddScoped<ApplicationService>();
 var app = builder.Build();
 
