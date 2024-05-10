@@ -25,13 +25,11 @@ namespace ConfigurationAPI.Repositories
         public async Task AddConfigurationAsync(Configuration config)
         {
             await _context.Configurations.AddAsync(config);
-            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateConfigurationAsync(Configuration config)
         {
             _context.Configurations.Update(config);
-            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteConfigurationAsync(string name)
@@ -40,7 +38,6 @@ namespace ConfigurationAPI.Repositories
             if (config != null)
             {
                 _context.Configurations.Remove(config);
-                await _context.SaveChangesAsync();
             }
         }
     }

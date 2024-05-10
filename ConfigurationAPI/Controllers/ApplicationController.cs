@@ -1,4 +1,5 @@
-﻿using ConfigurationAPI.Services;
+﻿using ConfigurationAPI.Models;
+using ConfigurationAPI.Services;
 using ConfigurationLibrary;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,71 +18,131 @@ namespace ConfigurationAPI.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Application>> GetAllApplications()
+        public async Task<ActionResult<Response<IEnumerable<object>>>> GetAllApplications()
         {
-            return Ok(_applicationService.GetAllApplications());
+            var applications = await _applicationService.GetAllApplicationsAsync();
+
+            var result = applications.Select(app => new
+            {
+                app.Id,
+                app.ServiceName,
+                app.ApplicationUrl
+            });
+
+            return Ok(new Response<IEnumerable<object>>
+            {
+                StatusCode = 200,
+                Message = "Applications retrieved successfully.",
+                Data = result
+            });
         }
 
         [HttpGet("{serviceName}")]
-        public ActionResult<Application> GetApplicationByServiceName(string serviceName)
+        public async Task<ActionResult<Response<object>>> GetApplicationByServiceName(string serviceName)
         {
-            var app = _applicationService.GetApplicationByServiceName(serviceName);
-            if (app == null)
+            var application = await _applicationService.GetApplicationByServiceNameAsync(serviceName);
+            if (application == null)
             {
-                return NotFound();
+                return NotFound(new Response<object>
+                {
+                    StatusCode = 404,
+                    Message = "Application not found.",
+                    Data = null
+                });
             }
-            return Ok(app);
+
+            var result = new
+            {
+                application.Id,
+                application.ServiceName,
+                application.ApplicationUrl
+            };
+
+            return Ok(new Response<object>
+            {
+                StatusCode = 200,
+                Message = "Application retrieved successfully.",
+                Data = result
+            });
         }
 
         [HttpPost]
-        public ActionResult AddApplication(string serviceName, string applicationUrl)
+        public async Task<ActionResult<Response<object>>> AddApplication(string serviceName, string applicationUrl)
         {
             try
             {
-                _applicationService.AddApplication(serviceName, applicationUrl);
-                return CreatedAtAction(nameof(GetApplicationByServiceName), new { serviceName = serviceName }, null);
+                await _applicationService.AddApplicationAsync(serviceName, applicationUrl);
+                return CreatedAtAction(nameof(GetApplicationByServiceName), new { serviceName = serviceName }, new Response<object>
+                {
+                    StatusCode = 201,
+                    Message = "Application added successfully.",
+                    Data = null
+                });
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new Response<object>
+                {
+                    StatusCode = 400,
+                    Message = ex.Message,
+                    Data = null
+                });
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message);
+                return Conflict(new Response<object>
+                {
+                    StatusCode = 409,
+                    Message = ex.Message,
+                    Data = null
+                });
             }
         }
 
         [HttpPut("{serviceName}")]
-        public ActionResult UpdateApplication(string serviceName, string applicationUrl)
+        public async Task<ActionResult<Response<object>>> UpdateApplication(string serviceName, string applicationUrl)
         {
-            var existingApp = _applicationService.GetApplicationByServiceName(serviceName);
+            var existingApp = await _applicationService.GetApplicationByServiceNameAsync(serviceName);
             if (existingApp == null)
             {
-                return NotFound();
+                return NotFound(new Response<object>
+                {
+                    StatusCode = 404,
+                    Message = "Application not found.",
+                    Data = null
+                });
             }
 
-            try
+            await _applicationService.UpdateApplicationAsync(serviceName, applicationUrl);
+            return Ok(new Response<object>
             {
-                _applicationService.UpdateApplication(serviceName, applicationUrl);
-                return NoContent();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
+                StatusCode = 200,
+                Message = "Application updated successfully.",
+                Data = null
+            });
         }
 
         [HttpDelete("{serviceName}")]
-        public ActionResult DeleteApplication(string serviceName)
+        public async Task<ActionResult<Response<object>>> DeleteApplication(string serviceName)
         {
-            var existingApp = _applicationService.GetApplicationByServiceName(serviceName);
+            var existingApp = await _applicationService.GetApplicationByServiceNameAsync(serviceName);
             if (existingApp == null)
             {
-                return NotFound();
+                return NotFound(new Response<object>
+                {
+                    StatusCode = 404,
+                    Message = "Application not found.",
+                    Data = null
+                });
             }
 
-            _applicationService.DeleteApplication(serviceName);
-            return NoContent();
+            await _applicationService.DeleteApplicationAsync(serviceName);
+            return Ok(new Response<object>
+            {
+                StatusCode = 200,
+                Message = "Application deleted successfully.",
+                Data = null
+            });
         }
     }
 }

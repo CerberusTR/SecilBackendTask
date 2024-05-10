@@ -4,23 +4,23 @@ using Newtonsoft.Json;
 
 namespace ConfigurationAPI.Services
 {
-    public class ConfigurationService
+    public class ConfigurationService : IConfigurationService
     {
-        private readonly IConfigurationRepository _configurationRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ConfigurationService(IConfigurationRepository configurationRepository)
+        public ConfigurationService(IUnitOfWork unitOfWork)
         {
-            _configurationRepository = configurationRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Configuration> GetConfigurationByNameAsync(string name)
         {
-            return await _configurationRepository.GetConfigurationByNameAsync(name);
+            return await _unitOfWork.Configurations.GetConfigurationByNameAsync(name);
         }
 
         public async Task<IEnumerable<Configuration>> GetAllConfigurationsAsync()
         {
-            return await _configurationRepository.GetAllConfigurationsAsync();
+            return await _unitOfWork.Configurations.GetAllConfigurationsAsync();
         }
 
         public async Task AddConfigurationAsync(string name, string type, string value, string applicationName)
@@ -28,6 +28,12 @@ namespace ConfigurationAPI.Services
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(type) || value == null || string.IsNullOrEmpty(applicationName))
             {
                 throw new ArgumentException("All fields are required.");
+            }
+
+            var existingConfig = await _unitOfWork.Configurations.GetConfigurationByNameAsync(name);
+            if (existingConfig != null)
+            {
+                throw new InvalidOperationException("A configuration with the same name already exists.");
             }
 
             var config = new Configuration
@@ -40,12 +46,13 @@ namespace ConfigurationAPI.Services
                 UpdatedDate = DateTime.UtcNow
             };
 
-            await _configurationRepository.AddConfigurationAsync(config);
+            await _unitOfWork.Configurations.AddConfigurationAsync(config);
+            await _unitOfWork.CompleteAsync();
         }
 
         public async Task UpdateConfigurationAsync(string name, string type, string value, bool isActive, string applicationName)
         {
-            var config = await _configurationRepository.GetConfigurationByNameAsync(name);
+            var config = await _unitOfWork.Configurations.GetConfigurationByNameAsync(name);
             if (config != null)
             {
                 config.Type = type;
@@ -54,13 +61,35 @@ namespace ConfigurationAPI.Services
                 config.ApplicationName = applicationName;
                 config.UpdatedDate = DateTime.UtcNow;
 
-                await _configurationRepository.UpdateConfigurationAsync(config);
+                await _unitOfWork.Configurations.UpdateConfigurationAsync(config);
+                await _unitOfWork.CompleteAsync();
             }
         }
 
         public async Task DeleteConfigurationAsync(string name)
         {
-            await _configurationRepository.DeleteConfigurationAsync(name);
+            await _unitOfWork.Configurations.DeleteConfigurationAsync(name);
+            await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task<string> GetDataAsync(string data)
+        {
+            // Implement your data fetching logic here
+            // This is just an example, replace it with actual logic
+            return await Task.FromResult($"Fetched data for {data}");
+        }
+
+        public async Task UpdateConfigurationStatusAsync(string name, bool isActive)
+        {
+            var config = await _unitOfWork.Configurations.GetConfigurationByNameAsync(name);
+            if (config != null)
+            {
+                config.IsActive = isActive;
+                config.UpdatedDate = DateTime.UtcNow;
+
+                await _unitOfWork.Configurations.UpdateConfigurationAsync(config);
+                await _unitOfWork.CompleteAsync();
+            }
         }
     }
 }

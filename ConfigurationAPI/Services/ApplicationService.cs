@@ -1,72 +1,74 @@
-﻿using ConfigurationLibrary;
+﻿using ConfigurationAPI.Repositories;
+using ConfigurationLibrary;
 
 namespace ConfigurationAPI.Services
 {
-    public class ApplicationService
+    public class ApplicationService : IApplicationService
     {
-        private readonly ConfigurationContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ApplicationService(ConfigurationContext context)
+        public ApplicationService(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
-        public Application GetApplicationByServiceName(string serviceName)
+        public async Task<Application> GetApplicationByServiceNameAsync(string serviceName)
         {
-            return _context.Applications.FirstOrDefault(app => app.ServiceName == serviceName);
+            return await _unitOfWork.Applications.GetApplicationByServiceNameAsync(serviceName);
         }
 
-        public IEnumerable<Application> GetAllApplications()
+        public async Task<IEnumerable<Application>> GetAllApplicationsAsync()
         {
-            return _context.Applications.ToList();
+            return await _unitOfWork.Applications.GetAllApplicationsAsync();
         }
 
-        public void AddApplication(string serviceName, string applicationUrl)
+        public async Task AddApplicationAsync(string serviceName, string applicationUrl)
         {
             if (string.IsNullOrEmpty(serviceName) || string.IsNullOrEmpty(applicationUrl))
             {
                 throw new ArgumentException("All fields are required.");
             }
 
-            if (_context.Applications.Any(a => a.ServiceName == serviceName))
+            var existingApp = await _unitOfWork.Applications.GetApplicationByServiceNameAsync(serviceName);
+            if (existingApp != null)
             {
                 throw new InvalidOperationException("An application with the same service name already exists.");
             }
 
-            var app = new Application
+            var application = new Application
             {
                 ServiceName = serviceName,
                 ApplicationUrl = applicationUrl
             };
-            _context.Applications.Add(app);
-            _context.SaveChanges();
+
+            await _unitOfWork.Applications.AddApplicationAsync(application);
+            await _unitOfWork.CompleteAsync();
         }
 
-        public void UpdateApplication(string serviceName, string applicationUrl)
+        public async Task UpdateApplicationAsync(string serviceName, string applicationUrl)
         {
-            var app = _context.Applications.FirstOrDefault(a => a.ServiceName == serviceName);
-            if (app != null)
+            var application = await _unitOfWork.Applications.GetApplicationByServiceNameAsync(serviceName);
+            if (application != null)
             {
-                if (_context.Applications.Any(a => a.ServiceName == serviceName && a.Id != app.Id))
-                {
-                    throw new InvalidOperationException("An application with the same service name already exists.");
-                }
+                application.ApplicationUrl = applicationUrl;
 
-                app.ServiceName = serviceName;
-                app.ApplicationUrl = applicationUrl;
-
-                _context.SaveChanges();
+                await _unitOfWork.Applications.UpdateApplicationAsync(application);
+                await _unitOfWork.CompleteAsync();
             }
         }
 
-        public void DeleteApplication(string serviceName)
+        public async Task DeleteApplicationAsync(string serviceName)
         {
-            var app = _context.Applications.FirstOrDefault(a => a.ServiceName == serviceName);
-            if (app != null)
-            {
-                _context.Applications.Remove(app);
-                _context.SaveChanges();
-            }
+            await _unitOfWork.Applications.DeleteApplicationAsync(serviceName);
+            await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task<string> GetDataAsync(string serviceName)
+        {
+            // Implement your data fetching logic here
+            // This is just an example, replace it with actual logic
+            return await Task.FromResult($"Fetched data for {serviceName}");
         }
     }
+
 }

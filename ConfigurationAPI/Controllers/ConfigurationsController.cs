@@ -13,10 +13,12 @@ namespace ConfigurationAPI.Controllers
     public class ConfigurationController : ControllerBase
     {
         private readonly ConfigurationService _configurationService;
+        private readonly BackgroundServiceManager _backgroundServiceManager;
 
-        public ConfigurationController(ConfigurationService configurationService)
+        public ConfigurationController(ConfigurationService configurationService, BackgroundServiceManager backgroundServiceManager)
         {
             _configurationService = configurationService;
+            _backgroundServiceManager = backgroundServiceManager;
         }
 
         [HttpGet]
@@ -70,9 +72,23 @@ namespace ConfigurationAPI.Controllers
                 return CreatedAtAction(nameof(GetConfigurationByName), new { name = name },
                     ResponseHelper.CreateResponse(type, 201, "Configuration added successfully.", value));
             }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new Response<object>
+                {
+                    StatusCode = 409,
+                    Message = ex.Message,
+                    Data = null
+                });
+            }
             catch (ArgumentException ex)
             {
-                return BadRequest(ResponseHelper.CreateResponse(type, 400, ex.Message, null));
+                return BadRequest(new Response<object>
+                {
+                    StatusCode = 400,
+                    Message = ex.Message,
+                    Data = null
+                });
             }
         }
 
@@ -110,6 +126,54 @@ namespace ConfigurationAPI.Controllers
                 Message = "Configuration deleted successfully.",
                 Data = null
             });
+        }
+
+        [HttpPost("start")]
+        public async Task<IActionResult> StartBackgroundService()
+        {
+            try
+            {
+                await _backgroundServiceManager.StartAsync();
+                return Ok(new Response<object>
+                {
+                    StatusCode = 200,
+                    Message = "Background service started successfully.",
+                    Data = null
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new Response<object>
+                {
+                    StatusCode = 409,
+                    Message = ex.Message,
+                    Data = null
+                });
+            }
+        }
+
+        [HttpPost("stop")]
+        public async Task<IActionResult> StopBackgroundService()
+        {
+            try
+            {
+                await _backgroundServiceManager.StopAsync();
+                return Ok(new Response<object>
+                {
+                    StatusCode = 200,
+                    Message = "Background service stopped successfully.",
+                    Data = null
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new Response<object>
+                {
+                    StatusCode = 409,
+                    Message = ex.Message,
+                    Data = null
+                });
+            }
         }
     }
 }
