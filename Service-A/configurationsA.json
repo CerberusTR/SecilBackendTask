@@ -1,0 +1,18 @@
+[
+  {
+    "Id": "72d4e770-0501-477f-aeb5-791947044709",
+    "Name": "SiteName",
+    "Type": "string",
+    "Value": {
+      "ValueKind": 3
+    }
+  },
+  {
+    "Id": "b53ad7ef-d4f8-473a-bc8c-c55f9719c7b0",
+    "Name": "MaxItemCount",
+    "Type": "int",
+    "Value": {
+      "ValueKind": 3
+    }
+  }
+]

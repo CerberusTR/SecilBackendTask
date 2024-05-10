@@ -1,0 +1,6 @@
+@Service_B_HostAddress = http://localhost:5178
+
+GET {{Service_B_HostAddress}}/Configurations/
+Accept: application/json
+
+###
