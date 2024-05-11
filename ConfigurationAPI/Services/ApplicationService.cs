@@ -1,5 +1,6 @@
 ﻿using ConfigurationAPI.Repositories;
 using ConfigurationLibrary;
+using Microsoft.EntityFrameworkCore;
 
 namespace ConfigurationAPI.Services
 {
@@ -24,35 +25,29 @@ namespace ConfigurationAPI.Services
 
         public async Task AddApplicationAsync(string serviceName, string applicationUrl)
         {
-            if (string.IsNullOrEmpty(serviceName) || string.IsNullOrEmpty(applicationUrl))
-            {
-                throw new ArgumentException("All fields are required.");
-            }
-
             var existingApp = await _unitOfWork.Applications.GetApplicationByServiceNameAsync(serviceName);
             if (existingApp != null)
             {
                 throw new InvalidOperationException("An application with the same service name already exists.");
             }
 
-            var application = new Application
+            var app = new Application
             {
                 ServiceName = serviceName,
                 ApplicationUrl = applicationUrl
             };
 
-            await _unitOfWork.Applications.AddApplicationAsync(application);
+            await _unitOfWork.Applications.AddApplicationAsync(app);
             await _unitOfWork.CompleteAsync();
         }
 
         public async Task UpdateApplicationAsync(string serviceName, string applicationUrl)
         {
-            var application = await _unitOfWork.Applications.GetApplicationByServiceNameAsync(serviceName);
-            if (application != null)
+            var app = await _unitOfWork.Applications.GetApplicationByServiceNameAsync(serviceName);
+            if (app != null)
             {
-                application.ApplicationUrl = applicationUrl;
-
-                await _unitOfWork.Applications.UpdateApplicationAsync(application);
+                app.ApplicationUrl = applicationUrl;
+                await _unitOfWork.Applications.UpdateApplicationAsync(app);
                 await _unitOfWork.CompleteAsync();
             }
         }
@@ -61,13 +56,6 @@ namespace ConfigurationAPI.Services
         {
             await _unitOfWork.Applications.DeleteApplicationAsync(serviceName);
             await _unitOfWork.CompleteAsync();
-        }
-
-        public async Task<string> GetDataAsync(string serviceName)
-        {
-            // Implement your data fetching logic here
-            // This is just an example, replace it with actual logic
-            return await Task.FromResult($"Fetched data for {serviceName}");
         }
     }
 

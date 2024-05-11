@@ -2,21 +2,29 @@
 {
     public class BackgroundServiceManager
     {
-        private readonly IHostedService _hostedService;
+        private readonly BackgroundDataFetcher _backgroundDataFetcher;
 
-        public BackgroundServiceManager(IHostedService hostedService)
+        public BackgroundServiceManager(IEnumerable<IHostedService> hostedServices)
         {
-            _hostedService = hostedService;
+            _backgroundDataFetcher = hostedServices.OfType<BackgroundDataFetcher>().FirstOrDefault();
         }
 
-        public async Task StartAsync()
+        public Task StartAsync()
         {
-            await _hostedService.StartAsync(default);
+            if (_backgroundDataFetcher != null)
+            {
+                return _backgroundDataFetcher.StartAsync(CancellationToken.None);
+            }
+            throw new InvalidOperationException("BackgroundDataFetcher service is not available.");
         }
 
-        public async Task StopAsync()
+        public Task StopAsync()
         {
-            await _hostedService.StopAsync(default);
+            if (_backgroundDataFetcher != null)
+            {
+                return _backgroundDataFetcher.StopAsync(CancellationToken.None);
+            }
+            throw new InvalidOperationException("BackgroundDataFetcher service is not available.");
         }
     }
 }

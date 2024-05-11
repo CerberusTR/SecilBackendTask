@@ -14,11 +14,10 @@ builder.Services.AddSwaggerGen();
 // Add services to the container.
 builder.Services.AddDbContext<ConfigurationContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<ConfigurationService>();
 builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
-builder.Services.AddScoped<ApplicationService>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddHttpClient(); // Add HttpClient
 builder.Services.AddHostedService<BackgroundDataFetcher>(); // Add the background service
 builder.Services.AddSingleton<BackgroundServiceManager>(); // Add the background service manager
 builder.Services.AddCors(options =>

@@ -12,10 +12,10 @@ namespace ConfigurationAPI.Controllers
     [ApiController]
     public class ConfigurationController : ControllerBase
     {
-        private readonly ConfigurationService _configurationService;
+        private readonly IConfigurationService _configurationService;
         private readonly BackgroundServiceManager _backgroundServiceManager;
 
-        public ConfigurationController(ConfigurationService configurationService, BackgroundServiceManager backgroundServiceManager)
+        public ConfigurationController(IConfigurationService configurationService, BackgroundServiceManager backgroundServiceManager)
         {
             _configurationService = configurationService;
             _backgroundServiceManager = backgroundServiceManager;

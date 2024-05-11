@@ -1,6 +1,6 @@
 ﻿namespace ConfigurationAPI.Repositories
 {
-    public interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork
     {
         IConfigurationRepository Configurations { get; }
         IApplicationRepository Applications { get; }

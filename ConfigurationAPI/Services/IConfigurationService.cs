@@ -9,7 +9,7 @@ namespace ConfigurationAPI.Services
         Task AddConfigurationAsync(string name, string type, string value, string applicationName);
         Task UpdateConfigurationAsync(string name, string type, string value, bool isActive, string applicationName);
         Task DeleteConfigurationAsync(string name);
-        Task<string> GetDataAsync(string data);
+        Task<string> FetchDataAsync(string url);
         Task UpdateConfigurationStatusAsync(string name, bool isActive);
     }
 }

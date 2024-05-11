@@ -1,5 +1,6 @@
 ﻿using ConfigurationAPI.Repositories;
 using ConfigurationLibrary;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace ConfigurationAPI.Services
@@ -7,10 +8,14 @@ namespace ConfigurationAPI.Services
     public class ConfigurationService : IConfigurationService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<ConfigurationService> _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public ConfigurationService(IUnitOfWork unitOfWork)
+        public ConfigurationService(IUnitOfWork unitOfWork, ILogger<ConfigurationService> logger, IHttpClientFactory httpClientFactory)
         {
             _unitOfWork = unitOfWork;
+            _logger = logger;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<Configuration> GetConfigurationByNameAsync(string name)
@@ -72,11 +77,21 @@ namespace ConfigurationAPI.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        public async Task<string> GetDataAsync(string data)
+        public async Task<string> FetchDataAsync(string url)
         {
-            // Implement your data fetching logic here
-            // This is just an example, replace it with actual logic
-            return await Task.FromResult($"Fetched data for {data}");
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                var response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+                var data = await response.Content.ReadAsStringAsync();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching data from {Url}", url);
+                throw;
+            }
         }
 
         public async Task UpdateConfigurationStatusAsync(string name, bool isActive)
@@ -84,12 +99,18 @@ namespace ConfigurationAPI.Services
             var config = await _unitOfWork.Configurations.GetConfigurationByNameAsync(name);
             if (config != null)
             {
+                _logger.LogInformation("Updating configuration status for {0} to {1}", name, isActive);
                 config.IsActive = isActive;
                 config.UpdatedDate = DateTime.UtcNow;
 
                 await _unitOfWork.Configurations.UpdateConfigurationAsync(config);
                 await _unitOfWork.CompleteAsync();
             }
+            else
+            {
+                _logger.LogWarning("Configuration {0} not found", name);
+            }
         }
     }
 }
+

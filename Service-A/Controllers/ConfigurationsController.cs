@@ -5,7 +5,7 @@ using Service_A.Repositories;
 
 namespace Service_A.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class ConfigurationsController : ControllerBase
     {

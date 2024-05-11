@@ -5,8 +5,8 @@ using Service_B.Repositories;
 
 namespace Service_B.Controllers
 {
-    [ApiController]
     [Route("[controller]")]
+    [ApiController]
     public class ConfigurationsController : ControllerBase
     {
         private readonly FileConfigurationRepository _repository;
