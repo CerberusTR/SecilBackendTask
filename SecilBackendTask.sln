@@ -5,13 +5,13 @@ VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BA596119-76DA-461B-B12C-FF60412D1B4C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConfigurationLibrary", "ConfigurationLibrary\ConfigurationLibrary.csproj", "{03C80A41-F4F8-4A52-9313-7622A9A027E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfigurationLibrary", "ConfigurationLibrary\ConfigurationLibrary.csproj", "{03C80A41-F4F8-4A52-9313-7622A9A027E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConfigurationAPI", "ConfigurationAPI\ConfigurationAPI.csproj", "{A377EF27-59A7-49EF-A8DF-C869C2AC36C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfigurationAPI", "ConfigurationAPI\ConfigurationAPI.csproj", "{A377EF27-59A7-49EF-A8DF-C869C2AC36C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service-A", "Service-A\Service-A.csproj", "{F73D037B-2E3B-409D-B298-F1F2F0BA4651}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Service-A", "Service-A\Service-A.csproj", "{F73D037B-2E3B-409D-B298-F1F2F0BA4651}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service-B", "Service-B\Service-B.csproj", "{00A52A84-B625-41AC-AB8D-20B6E38665DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Service-B", "Service-B\Service-B.csproj", "{00A52A84-B625-41AC-AB8D-20B6E38665DA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
