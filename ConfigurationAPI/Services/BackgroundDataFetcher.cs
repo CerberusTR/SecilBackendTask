@@ -8,23 +8,26 @@ namespace ConfigurationAPI.Services
         private readonly ILogger<BackgroundDataFetcher> _logger;
         private Task _executingTask;
         private CancellationTokenSource _cts;
+        private bool _isRunning;
 
         public BackgroundDataFetcher(IServiceProvider serviceProvider, ILogger<BackgroundDataFetcher> logger)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
+            _isRunning = false;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
+            // Arka plan servisini başlatma işlemi.
             _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            _executingTask = ExecuteAsync(_cts.Token);
-
-            return _executingTask.IsCompleted ? _executingTask : Task.CompletedTask;
+            _logger.LogInformation("BackgroundDataFetcher initialized but not started.");
+            return Task.CompletedTask;
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
+            // Arka plan servisini durdurma işlemi.
             if (_executingTask == null)
             {
                 return;
@@ -35,6 +38,30 @@ namespace ConfigurationAPI.Services
             await Task.WhenAny(_executingTask, Task.Delay(Timeout.Infinite, cancellationToken));
 
             cancellationToken.ThrowIfCancellationRequested();
+        }
+
+        public Task StartFetchingAsync()
+        {
+            if (!_isRunning)
+            {
+                _isRunning = true;
+                _executingTask = ExecuteAsync(_cts.Token);
+                _logger.LogInformation("BackgroundDataFetcher started fetching.");
+            }
+
+            return _executingTask.IsCompleted ? _executingTask : Task.CompletedTask;
+        }
+
+        public Task StopFetchingAsync()
+        {
+            if (_isRunning)
+            {
+                _isRunning = false;
+                _cts.Cancel();
+                _logger.LogInformation("BackgroundDataFetcher stopped fetching.");
+            }
+
+            return Task.CompletedTask;
         }
 
         protected virtual async Task ExecuteAsync(CancellationToken stoppingToken)

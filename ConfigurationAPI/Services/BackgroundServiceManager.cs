@@ -13,7 +13,7 @@
         {
             if (_backgroundDataFetcher != null)
             {
-                return _backgroundDataFetcher.StartAsync(CancellationToken.None);
+                return _backgroundDataFetcher.StartFetchingAsync();
             }
             throw new InvalidOperationException("BackgroundDataFetcher service is not available.");
         }
@@ -22,7 +22,7 @@
         {
             if (_backgroundDataFetcher != null)
             {
-                return _backgroundDataFetcher.StopAsync(CancellationToken.None);
+                return _backgroundDataFetcher.StopFetchingAsync();
             }
             throw new InvalidOperationException("BackgroundDataFetcher service is not available.");
         }
